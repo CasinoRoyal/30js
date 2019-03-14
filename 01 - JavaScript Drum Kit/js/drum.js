@@ -18,7 +18,7 @@ function removeAnimation (e) {
 const keys = document.querySelectorAll('.keys');
 
 keys.forEach(key => {
-  key.addEventListener('transitionend', removeAnimation)
-})
+  key.addEventListener('transitionend', removeAnimation);
+});
 
 window.addEventListener('keydown', playSound);
