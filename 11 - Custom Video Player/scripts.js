@@ -3,28 +3,24 @@ const playerControls = document.querySelector('.player__controls');
 const progressBar = playerControls.querySelector('.progress');
 const progressBarFilled = progressBar.querySelector('.progress__filled');
 const playBtn = playerControls.querySelector('.toggle');
-const volumeBar = playerControls.querySelector('.player__controls input[name=volume]');
-const playbackRate = playerControls.querySelector('.player__controls input[name=playbackRate]');
+const ranges = playerControls.querySelectorAll('.player__slider');
 const skipBtns = playerControls.querySelectorAll('.skip');
+const fullScrBtn = playerControls.querySelector('.fullscreen');
 
 let isClicked = false;
 
 function togglePlay (e) {
+  const videoStatus = player.paused ? 'play' : 'pause';
+  player[videoStatus]();
+}
 
-  if(!player.paused) {
-    player.pause();
-    playBtn.textContent = '►';
-  } else {
-    player.play();
-    playBtn.textContent = '||';
-  }
-
+function changeIcon () {
+  const icon = this.paused ? '►' : '||';
+  playBtn.textContent = icon;
 }
 
 function rewind (e) {
-  if(isClicked) {
-    player.currentTime = (e.offsetX / progressBar.offsetWidth) * player.duration;
-  }
+  player.currentTime = (e.offsetX / progressBar.offsetWidth) * player.duration;
 }
 
 function updateProgressBar () {
@@ -32,33 +28,39 @@ function updateProgressBar () {
   progressBarFilled.style.flexBasis = (player.currentTime * 100) / player.duration + '%';
 }
 
-function changeVolume (e) {
-  player.volume = e.target.value;
+function changeRange (e) {
+  player[this.name] = this.value;
 }
 
 function skip (e)  {
   player.currentTime += parseFloat(this.dataset.skip);
 }
 
+function toggleFullScr () {
+  player.requestFullscreen() || player.mozRequestFullScreen() || player.webkitRequestFullScreen() || player.msRequestFullscreen();
+}
 
-playBtn.addEventListener('click', togglePlay);
 player.addEventListener('click', togglePlay);
-
-progressBar.addEventListener('click', (e) => { 
-  isClicked = true; 
-  rewind(e);
-  isClicked = false; 
-});
-progressBar.addEventListener('mousemove', rewind);
+player.addEventListener('play', changeIcon);
+player.addEventListener('pause', changeIcon);
+playBtn.addEventListener('click', togglePlay);
+progressBar.addEventListener('click', rewind);
+progressBar.addEventListener('mousemove', (e) => isClicked && rewind(e));
 progressBar.addEventListener('mousedown', () => isClicked = true);
 progressBar.addEventListener('mouseup', () => isClicked = false);
 player.addEventListener('timeupdate', updateProgressBar);
 
-volumeBar.addEventListener('change', changeVolume)
-volumeBar.addEventListener('mousemove', changeVolume)
+ranges.forEach(range => {
+  range.addEventListener('change', changeRange)
+  range.addEventListener('mousemove', changeRange)
+});
 
 skipBtns.forEach(btn => {
   
   btn.addEventListener('click', skip)
 
 });
+
+fullScrBtn.addEventListener('click', toggleFullScr);
+
+//var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
